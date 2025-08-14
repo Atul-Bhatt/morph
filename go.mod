@@ -3,7 +3,7 @@ module morph
 go 1.24.2
 
 require (
-	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+	github.com/otiai10/gosseract/v2 v2.4.1
 	modernc.org/tk9.0 v1.71.2
 )
 
