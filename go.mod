@@ -3,6 +3,7 @@ module morph
 go 1.24.2
 
 require (
+	github.com/gen2brain/go-fitz v1.24.15
 	github.com/otiai10/gosseract/v2 v2.4.1
 	modernc.org/tk9.0 v1.71.2
 )
@@ -15,6 +16,7 @@ require (
 	github.com/evilsocket/islazy v1.11.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
+	github.com/jupiterrider/ffi v0.5.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
