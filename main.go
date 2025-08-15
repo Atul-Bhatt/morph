@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"image/jpeg"
+	"image/png"
+	"bytes"
 	. "modernc.org/tk9.0"
 	_ "modernc.org/tk9.0/themes/azure"
 	"github.com/otiai10/gosseract/v2"
@@ -30,17 +29,11 @@ func main() {
 			panic(err)
 		}
 
-		f, err := os.Create(filepath.Join(fmt.Sprintf("test%03d.jpg", n)))
-		if err != nil {
-			panic(err)
-		}
-		err = jpeg.Encode(f, img, &jpeg.Options{jpeg.DefaultQuality})
-		if err != nil {
-			panic(err)
-		}
-		f.Close()		
+		var buf bytes.Buffer
+		png.Encode(&buf, img)
+		b := buf.Bytes()
 
-		client.SetImage(fmt.Sprintf("test%03d.jpg", n))
+		client.SetImageFromBytes(b)
 		text, err = client.Text()
 		if err != nil {
 			fmt.Println(err)
