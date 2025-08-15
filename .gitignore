@@ -1,5 +1,5 @@
 sample_image.png
-sample_text.pdf
+*.pdf
 *.exe
 *.jpg
 *.png
