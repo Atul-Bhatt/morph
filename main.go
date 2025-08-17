@@ -21,6 +21,8 @@ func main() {
 	defer doc.Close()
 
 	ActivateTheme("azure light")
+	out := Label(Height(2), Anchor("e"), Txt("Morph PDF Editor"))
+	Grid(out, Columnspan(1), Sticky("e"))
 	t := Text(Font("helvetica", 10), Padx("2m"), Pady("2m"))
 
 	// Extract pages as images and pass to tesseract
@@ -40,10 +42,9 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-		Grid(t, Sticky("news"), Pady("5m"))
-		t.InsertML(text + "<br><br><br><br>")
-
+		t.InsertML(text + "<br>" + string(n) + "<br>")
 	}
+	Grid(t, Padx("1m"), Pady("2m"), Ipadx("1m"), Ipady("1m"))
 	Grid(TExit(), Padx("1m"), Pady("2m"), Ipadx("1m"), Ipady("1m"))
 	App.Center().Wait()
 }
