@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"image/png"
 	"bytes"
+	"strings"
 	. "modernc.org/tk9.0"
 	_ "modernc.org/tk9.0/themes/azure"
 	"github.com/otiai10/gosseract/v2"
 	"github.com/gen2brain/go-fitz"
+	"github.com/go-pdf/fpdf"
 )
 
 func main() {
@@ -45,6 +47,18 @@ func main() {
 		t.InsertML(text + "<br>" + string(n) + "<br>")
 	}
 	Grid(t, Padx("1m"), Pady("2m"), Ipadx("1m"), Ipady("1m"))
+	Grid(TButton(Txt("Save PDF"), Command(func() { SavePDF(t.Get("1.0", "end-1c")) })))
 	Grid(TExit(), Padx("1m"), Pady("2m"), Ipadx("1m"), Ipady("1m"))
 	App.Center().Wait()
+}
+
+func SavePDF(text []string) {
+	pdf := fpdf.New(fpdf.OrientationPortrait, "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("helvetica", "", 12)
+	pdf.MultiCell(0, 5, strings.Join(text, " "), "", "", false)
+	err := pdf.OutputFileAndClose("output.pdf")
+	if err != nil {
+		fmt.Println("Error creating pdf: ", err)
+	}
 }
