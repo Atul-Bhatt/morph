@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"strings"
 	"time"
+	"sync"
 	. "modernc.org/tk9.0"
 	_ "modernc.org/tk9.0/themes/azure"
 	"github.com/otiai10/gosseract/v2"
@@ -29,25 +30,13 @@ func main() {
 	Grid(out, Columnspan(1), Sticky("e"))
 	t := Text(Font("helvetica", 10), Padx("2m"), Pady("2m"))
 
+	var wg sync.WaitGroup
 	// Extract pages as images and pass to tesseract
 	for n := 0; n < doc.NumPage(); n++ {
-		fmt.Println("Processing page: ", n)
-		img, err := doc.Image(n)
-		if err != nil {
-			panic(err)
-		}
-
-		var buf bytes.Buffer
-		png.Encode(&buf, img)
-		b := buf.Bytes()
-
-		client.SetImageFromBytes(b)
-		text, err := client.Text()
-		if err != nil {
-			fmt.Println(err)
-		}
-		t.InsertML(text + "<br>" + string(n) + "<br>")
+		wg.Add(1)
+		go ImageToText(doc, t, client, n, &wg)
 	}
+	wg.Wait()
 	Grid(t, Padx("1m"), Pady("2m"), Ipadx("1m"), Ipady("1m"))
 	Grid(TButton(Txt("Save PDF"), Command(func() { SavePDF(t.Get("1.0", "end-1c")) })))
 	Grid(TExit(), Padx("1m"), Pady("2m"), Ipadx("1m"), Ipady("1m"))
@@ -55,6 +44,26 @@ func main() {
 	fmt.Println("Time taken: ", now.Sub(time.Now()))
 
 	App.Center().Wait()
+}
+
+func ImageToText(doc *fitz.Document, t *TextWidget, client *gosseract.Client, n int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	fmt.Println("Processing page: ", n)
+	img, err := doc.Image(n)
+	if err != nil {
+		panic(err)
+	}
+
+	var buf bytes.Buffer
+	png.Encode(&buf, img)
+	b := buf.Bytes()
+
+	client.SetImageFromBytes(b)
+	text, err := client.Text()
+	if err != nil {
+		fmt.Println(err)
+	}
+	t.InsertML(text + "<br>" + string(n) + "<br>")
 }
 
 func SavePDF(text []string) {
