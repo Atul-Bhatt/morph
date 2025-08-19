@@ -5,6 +5,7 @@ import (
 	"image/png"
 	"bytes"
 	"strings"
+	"time"
 	. "modernc.org/tk9.0"
 	_ "modernc.org/tk9.0/themes/azure"
 	"github.com/otiai10/gosseract/v2"
@@ -13,10 +14,11 @@ import (
 )
 
 func main() {
+	now := time.Now()
 	client := gosseract.NewClient()
 	defer client.Close()
 
-	doc, err := fitz.New("metamorphosis.pdf")
+	doc, err := fitz.New("Metamorphosis.pdf")
 	if err != nil {
 		panic(err)
 	}
@@ -49,6 +51,9 @@ func main() {
 	Grid(t, Padx("1m"), Pady("2m"), Ipadx("1m"), Ipady("1m"))
 	Grid(TButton(Txt("Save PDF"), Command(func() { SavePDF(t.Get("1.0", "end-1c")) })))
 	Grid(TExit(), Padx("1m"), Pady("2m"), Ipadx("1m"), Ipady("1m"))
+
+	fmt.Println("Time taken: ", now.Sub(time.Now()))
+
 	App.Center().Wait()
 }
 
