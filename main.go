@@ -19,7 +19,8 @@ func main() {
 	now := time.Now()
 	uiText := Text(Font("helvetica", 10), Padx("2m"), Pady("2m"))
 	uiText.InsertML("Metamorphosis<br>")
-	uiTextChan := make(chan string, 5)
+	uiTextChan := make(chan string, 3)
+	processed := make(chan bool)
 
 	doc, err := fitz.New("Metamorphosis.pdf")
 	if err != nil {
@@ -39,19 +40,25 @@ func main() {
 		if err != nil {
 			fmt.Println("Error processing image")
 		}
-		go ImageToText(img, n, &wg, uiTextChan)
+		go ImageToText(img, n, doc.NumPage()-1, &wg, uiTextChan, processed)
 	}
 
+	var pollId string
 	var poll func()
 	poll = func() {
-		select {
-		case t := <-uiTextChan:
-			uiText.InsertML(t + "<br><br>")
-		default:
-			TclAfter(100, poll)
+		for {
+			select {
+			case t := <-uiTextChan:
+				uiText.InsertML(t + "<br><br>")	
+			case _ = <-processed:
+				TclAfterCancel(pollId)
+			default:
+				pollId = TclAfter(100, poll)
+				return
+			}
 		}
 	}
-	TclAfter(100, poll)
+	pollId = TclAfter(100, poll)
 
 	Grid(uiText, Padx("2m"), Pady("2m"))
 	Grid(TButton(Txt("Save PDF"), Command(func() { SavePDF(uiText.Get("1.0", "end-1c")) })))
@@ -61,7 +68,7 @@ func main() {
 	fmt.Println("Time taken: ", now.Sub(time.Now()))
 }
 
-func ImageToText(img *image.RGBA, n int, wg *sync.WaitGroup, uiTextChan chan string) {
+func ImageToText(img *image.RGBA, n int, totalPages int, wg *sync.WaitGroup, uiTextChan chan string, processed chan bool) {
 	client := gosseract.NewClient()
 	defer client.Close()
 	defer wg.Done()
@@ -79,6 +86,9 @@ func ImageToText(img *image.RGBA, n int, wg *sync.WaitGroup, uiTextChan chan str
 	}
 	uiTextChan <- text
 	fmt.Println("Processing complete: ", n)
+	if n >= totalPages {
+		processed <- true
+	}
 }
 
 func SavePDF(text []string) {
