@@ -15,18 +15,11 @@ import (
 	"github.com/go-pdf/fpdf"
 )
 
-type SyncText struct {
-	mu   sync.Mutex
-	txt *TextWidget
-}
-
 func main() {
 	now := time.Now()
-
-	var t SyncText
-	t.mu.Lock()
-	t.txt = Text(Font("helvetica", 10), Padx("2m"), Pady("2m"))
-	t.mu.Unlock()
+	uiText := Text(Font("helvetica", 10), Padx("2m"), Pady("2m"))
+	uiText.InsertML("Metamorphosis<br>")
+	uiTextChan := make(chan string, 5)
 
 	doc, err := fitz.New("Metamorphosis.pdf")
 	if err != nil {
@@ -46,18 +39,29 @@ func main() {
 		if err != nil {
 			fmt.Println("Error processing image")
 		}
-		go ImageToText(img, t, n, &wg)
+		go ImageToText(img, n, &wg, uiTextChan)
 	}
-	wg.Wait()
 
-	Grid(t.txt, Padx("1m"), Pady("2m"), Ipadx("1m"), Ipady("1m"))
-	Grid(TButton(Txt("Save PDF"), Command(func() { SavePDF(t.txt.Get("1.0", "end-1c")) })))
+	var poll func()
+	poll = func() {
+		select {
+		case t := <-uiTextChan:
+			uiText.InsertML(t + "<br><br>")
+		default:
+			TclAfter(100, poll)
+		}
+	}
+	TclAfter(100, poll)
+
+	Grid(uiText, Padx("2m"), Pady("2m"))
+	Grid(TButton(Txt("Save PDF"), Command(func() { SavePDF(uiText.Get("1.0", "end-1c")) })))
 	Grid(TExit(), Padx("1m"), Pady("2m"), Ipadx("1m"), Ipady("1m"))
-	fmt.Println("Time taken: ", now.Sub(time.Now()))
 	App.Center().Wait()
+	wg.Wait()
+	fmt.Println("Time taken: ", now.Sub(time.Now()))
 }
 
-func ImageToText(img *image.RGBA, t SyncText, n int, wg *sync.WaitGroup) {
+func ImageToText(img *image.RGBA, n int, wg *sync.WaitGroup, uiTextChan chan string) {
 	client := gosseract.NewClient()
 	defer client.Close()
 	defer wg.Done()
@@ -73,9 +77,7 @@ func ImageToText(img *image.RGBA, t SyncText, n int, wg *sync.WaitGroup) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	t.mu.Lock()
-	t.txt.InsertML(text + "<br>" + string(n) + "<br>")
-	t.mu.Unlock()
+	uiTextChan <- text
 	fmt.Println("Processing complete: ", n)
 }
 
