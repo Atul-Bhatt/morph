@@ -49,16 +49,20 @@ func main() {
 		for {
 			select {
 			case t := <-uiTextChan:
+				fmt.Println("polling...")
 				uiText.InsertML(t + "<br><br>")	
 			case _ = <-processed:
+				fmt.Println("cancelled")
 				TclAfterCancel(pollId)
 			default:
+				fmt.Println("polling default...")
+				time.Sleep(2 * time.Second)
 				pollId = TclAfter(100, poll)
 				return
 			}
 		}
 	}
-	pollId = TclAfter(100, poll)
+	pollId = TclAfter(2000, poll)
 
 	Grid(uiText, Padx("2m"), Pady("2m"))
 	Grid(TButton(Txt("Save PDF"), Command(func() { SavePDF(uiText.Get("1.0", "end-1c")) })))
