@@ -40,8 +40,9 @@ func main() {
 			uiText.InsertML(text + "<br><br>")
 		}
 	}
+	processPages()
 
-	TclAfter(time.Second * 1, processPages)
+	//TclAfter(time.Second * 1, processPages)
 	Grid(uiText, Padx("2m"), Pady("2m"))
 	Grid(TButton(Txt("Save PDF"), Command(func() { SavePDF(uiText.Get("1.0", "end-1c")) })))
 	Grid(TExit(), Padx("1m"), Pady("2m"), Ipadx("1m"), Ipady("1m"))
