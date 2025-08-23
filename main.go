@@ -6,17 +6,21 @@ import (
 	"image/png"
 	"bytes"
 	"strings"
-	"time"
-	. "modernc.org/tk9.0"
+	//"time"
+	tk "modernc.org/tk9.0"
 	_ "modernc.org/tk9.0/themes/azure"
 	"github.com/otiai10/gosseract/v2"
-	"github.com/gen2brain/go-fitz"
+	//"github.com/gen2brain/go-fitz"
 	"github.com/go-pdf/fpdf"
 )
 
+const APPNAME = "morph"
+
 func main() {
-	now := time.Now()
-	uiText := Text(Font("helvetica", 10), Padx("2m"), Pady("2m"))
+	app := NewApp()
+	app.Run()
+	/*now := time.Now()
+	uiText := tk.Text(tk.Font("helvetica", 10), tk.Padx("2m"), tk.Pady("2m"))
 	uiText.InsertML("Metamorphosis<br>")
 
 	doc, err := fitz.New("Metamorphosis.pdf")
@@ -25,9 +29,9 @@ func main() {
 	}
 	defer doc.Close()
 
-	ActivateTheme("azure light")
-	out := Label(Height(2), Anchor("e"), Txt("Morph PDF Editor"))
-	Grid(out, Columnspan(1), Sticky("e"))
+	tk.ActivateTheme("azure light")
+	out := tk.Label(tk.Height(2), tk.Anchor("e"), tk.Txt("Morph PDF Editor"))
+	tk.Grid(out, tk.Columnspan(1), tk.Sticky("e"))
 
 	processPages := func() {
 		// Extract pages as images and pass to tesseract
@@ -43,11 +47,33 @@ func main() {
 	processPages()
 
 	//TclAfter(time.Second * 1, processPages)
-	Grid(uiText, Padx("2m"), Pady("2m"))
-	Grid(TButton(Txt("Save PDF"), Command(func() { SavePDF(uiText.Get("1.0", "end-1c")) })))
-	Grid(TExit(), Padx("1m"), Pady("2m"), Ipadx("1m"), Ipady("1m"))
-	App.Center().Wait()
+	tk.Grid(uiText, tk.Padx("2m"), tk.Pady("2m"))
+	tk.Grid(tk.TButton(tk.Txt("Save PDF"), tk.Command(func() { SavePDF(uiText.Get("1.0", "end-1c")) })))
+	tk.Grid(tk.TExit(), tk.Padx("1m"), tk.Pady("2m"), tk.Ipadx("1m"), tk.Ipady("1m"))
+	tk.App.Center().Wait()
 	fmt.Println("Time taken: ", now.Sub(time.Now()))
+	*/
+}
+
+func NewApp() *App {
+	app := &App{name: "morph"}
+	tk.StyleThemeUse("clam")
+	tk.WmWithdraw(tk.App)
+	tk.WmAttributes(tk.App, tk.Topmost(true))
+	tk.App.WmTitle(APPNAME)
+	tk.App.Configure(tk.Background(tk.LightYellow), tk.Pady(0), tk.Padx(0))
+	tk.WmProtocol(tk.App, tk.WM_DELETE_WINDOW, app.onQuit)
+	for _, key := range []string{"<Escape>", "<q>", "<Return>"} {
+		tk.Bind(tk.App, key, tk.Command(app.onQuit))
+	}
+	tk.StyleConfigure("TButton", tk.Font(tk.HELVETICA, 36, tk.BOLD),
+		tk.Background(tk.LightYellow), tk.Foreground(tk.Red))
+	/*app.button = tk.TButton(tk.Txt(app.getMesage()), tk.Command(app.onQuit),
+		tk.Justify(tk.CENTER))
+	app.update()
+	tk.Pack(app.button, tk.Fill(tk.FILL_BOTH), tk.Expand(true),
+		tk.Ipadx(15), tk.Ipady(15))*/
+	return app
 }
 
 func ImageToText(img *image.RGBA, n int) string {
