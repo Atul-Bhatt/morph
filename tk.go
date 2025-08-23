@@ -4,6 +4,7 @@ import tk "modernc.org/tk9.0"
 
 type App struct {
 	name string
+	pdfText *tk.TextWidget
 }
 
 func (me *App) Run() {

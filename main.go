@@ -34,8 +34,8 @@ func main() {
 			if err != nil {
 				fmt.Println("Error processing image")
 			}
-			_ = ImageToText(img, n)
-			//uiText.InsertML(text + "<br><br>")
+			text := ImageToText(img, n)
+			app.pdfText.InsertML(text + "<br><br>")
 		}
 	}
 	processPages()
@@ -45,23 +45,14 @@ func main() {
 }
 
 func NewApp() *App {
-	app := &App{name: "morph"}
+	app := &App{name: "morph", pdfText: tk.Text(tk.Font("helvetica", 10), tk.Padx("2m"), tk.Pady("2m"))}
 	tk.StyleThemeUse("clam")
 	tk.WmWithdraw(tk.App)
 	tk.WmAttributes(tk.App, tk.Topmost(true))
 	tk.App.WmTitle(APPNAME)
 	tk.App.Configure(tk.Background(tk.LightYellow), tk.Pady(0), tk.Padx(0))
-	tk.WmProtocol(tk.App, tk.WM_DELETE_WINDOW, app.onQuit)
-	for _, key := range []string{"<Escape>", "<q>", "<Return>"} {
-		tk.Bind(tk.App, key, tk.Command(app.onQuit))
-	}
 	tk.StyleConfigure("TButton", tk.Font(tk.HELVETICA, 36, tk.BOLD),
 		tk.Background(tk.LightYellow), tk.Foreground(tk.Red))
-	/*app.button = tk.TButton(tk.Txt(app.getMesage()), tk.Command(app.onQuit),
-		tk.Justify(tk.CENTER))
-	app.update()
-	tk.Pack(app.button, tk.Fill(tk.FILL_BOTH), tk.Expand(true),
-		tk.Ipadx(15), tk.Ipady(15))*/
 	uiText := tk.Text(tk.Font("helvetica", 10), tk.Padx("2m"), tk.Pady("2m"))
 	uiText.InsertML("Metamorphosis<br>")
 	out := tk.Label(tk.Height(2), tk.Anchor("e"), tk.Txt("Morph PDF Editor"))
