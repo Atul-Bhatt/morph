@@ -1,6 +1,10 @@
 package main
 
-import tk "modernc.org/tk9.0"
+import 
+(
+	tk "modernc.org/tk9.0"
+	//"time"
+)
 
 type App struct {
 	name string
@@ -13,5 +17,10 @@ func (me *App) Run() {
 	tk.WmDeiconify(tk.App)
 	tk.App.Wait()
 }
+
+/*func (me *App) update(processPages func()) {
+	processPages()
+	tk.TclAfter(time.Second*10, me.update(processPages))
+}*/
 
 func (me *App) onQuit() { tk.Destroy(tk.App) }

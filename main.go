@@ -19,7 +19,6 @@ const APPNAME = "morph"
 func main() {
 	now := time.Now()
 	app := NewApp()
-	app.Run()
 
 	doc, err := fitz.New("Metamorphosis.pdf")
 	if err != nil {
@@ -38,9 +37,10 @@ func main() {
 			app.pdfText.InsertML(text + "<br><br>")
 		}
 	}
-	processPages()
+	//app.update(processPages)
+	tk.TclAfter(time.Second * 1, processPages)
+	app.Run()
 
-	//TclAfter(time.Second * 1, processPages)
 	fmt.Println("Time taken: ", now.Sub(time.Now()))
 }
 
